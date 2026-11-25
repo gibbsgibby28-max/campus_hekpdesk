@@ -1,0 +1,10 @@
+/uploads/attachments/*
+!/uploads/attachments/.htaccess
+/uploads/messages/*
+!/uploads/messages/.htaccess
+/uploads/profiles/*
+!/uploads/profiles/.htaccess
+/uploads/wallpapers/*
+!/uploads/wallpapers/.htaccess
+/uploads/statuses/*
+!/uploads/statuses/.htaccess
