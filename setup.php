@@ -12,8 +12,11 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$adminExists) {
         verify_csrf();
         $remoteAddress = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
-        if (!in_array($remoteAddress, ['127.0.0.1', '::1'], true)) {
-            throw new InvalidArgumentException('Initial administrator setup is only allowed from this computer.');
+        $setupToken = (string) (getenv('CAMPUS_SETUP_TOKEN') ?: '');
+        $isLocal = in_array($remoteAddress, ['127.0.0.1', '::1'], true);
+        $tokenOk = $setupToken !== '' && hash_equals($setupToken, (string) ($_POST['setup_token'] ?? ''));
+        if (!$isLocal && !$tokenOk) {
+            throw new InvalidArgumentException('Initial administrator setup is only allowed from this computer, or with the correct setup token.');
         }
         $name = trim((string) ($_POST['full_name'] ?? ''));
         $email = strtolower(trim((string) ($_POST['email'] ?? '')));
@@ -52,6 +55,7 @@ try {
         <form method="post" class="form-stack">
             <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
             <label>Administrator name<input name="full_name" required maxlength="150" autocomplete="name" value="<?= e($_POST['full_name'] ?? 'Gibson') ?>"></label>
+            <?php if (getenv('CAMPUS_SETUP_TOKEN')): ?><label>Setup token<input type="password" name="setup_token" autocomplete="off"></label><?php endif; ?>
             <label>Administrator email<input type="email" name="email" required maxlength="190" autocomplete="email" value="<?= e($_POST['email'] ?? '') ?>"></label>
             <button class="button button-primary button-full" type="submit">Initialize and create account</button>
         </form>
